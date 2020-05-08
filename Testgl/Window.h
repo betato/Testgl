@@ -4,6 +4,7 @@
 
 #include "FrameCounter.h"
 #include "Camera.h"
+#include "FontManager.h"
 
 class Window
 {
@@ -41,6 +42,10 @@ private:
 	GLFWwindow* window;
 	FrameCounter frameCounter;
 	Camera camera;
+	FontManager fontManager;
+
+	Shader simpleShader;
+	Shader fontShader;
 
 	int screenWidth;
 	int screenHeight;

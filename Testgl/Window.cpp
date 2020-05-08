@@ -22,13 +22,13 @@ void Window::init()
 {
 	window = glfwCreateWindow(screenWidth, screenHeight, "CUBOIDAL", NULL, NULL);
 	if (window == nullptr) {
-		std::cerr << "Failed to create GLFW window" << std::endl;
+		std::cerr << "ERROR::GLFW::WINDOW_CREATION_FAILED" << std::endl;
 		glfwTerminate();
 		return;
 	}
 	glfwMakeContextCurrent(window);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cerr << "Failed to initialize GLAD" << std::endl;
+		std::cerr << "ERROR::GLAD::INIT_FAILED" << std::endl;
 		return;
 	}
 
@@ -41,6 +41,12 @@ void Window::init()
 	glfwSetFramebufferSizeCallback(window, windowResizeCallback);
 	glfwSetCursorPosCallback(window, mouseMoveCallback);
 	glfwSetScrollCallback(window, mouseScrollCallback);
+
+	// For font rendering
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	fontManager.loadFont("../Testgl/res/font/Anonymous Pro B.ttf");
 }
 
 void Window::run()
@@ -101,14 +107,12 @@ void Window::run()
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
-
 	unsigned int VBO, VAO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
 	// Position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -116,6 +120,7 @@ void Window::run()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+	// Load texture
 	unsigned int tex;
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
@@ -136,15 +141,13 @@ void Window::run()
 	}
 	else
 	{
-		std::cerr << "Texture loading failed" << std::endl;
+		std::cerr << "ERROR::TEXTURE::LOADING_FAILED" << std::endl;
 	}
 	stbi_image_free(image);
 
-	// Load Shader
-	Shader simpleShader = Shader("../Testgl/res/shader/simple.vert", "../Testgl/res/shader/simple.frag");
-	simpleShader.use();
-	simpleShader.use();
-	simpleShader.setInt("tex", 0);
+	// Load Shaders
+	fontShader.load("../Testgl/res/shader/text.vert", "../Testgl/res/shader/text.frag");
+	simpleShader.load("../Testgl/res/shader/simple.vert", "../Testgl/res/shader/simple.frag");
 
 	// Capture cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -154,19 +157,21 @@ void Window::run()
 	{
 		processInput(window);
 		frameCounter.update(glfwGetTime());
-		//std::cout << frameCounter.fps << std::endl;
 
+		// Clear
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 		// Camera
 		simpleShader.use();
 		glm::mat4 projection = glm::mat4(1.0f);
 		projection = glm::perspective(glm::radians(camera.fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		simpleShader.setMat4("projection", projection);
 		simpleShader.setMat4("view", camera.getView());
-		// Clear
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// Draw
+		// Draw scene
 		glBindVertexArray(VAO);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		simpleShader.setInt("tex", 0);
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			// calculate the model matrix for each object and pass it to shader before drawing
@@ -177,6 +182,12 @@ void Window::run()
 			simpleShader.setMat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+		// Draw text
+		fontShader.use();
+		fontShader.setMat4("projection", glm::ortho(0.0f, (float)screenWidth, 0.0f, (float)screenHeight));
+		glUniform3f(glGetUniformLocation(fontShader.ID, "textColor"), 1.0f, 1.0f, 1.0f);
+		fontManager.drawText(std::to_string(frameCounter.fps), 25.0f, 25.0f, 0.5f);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -194,7 +205,7 @@ bool firstMouse = true;
 
 bool cursorCaptured = true;
 bool spaceDown = false;
-double lastTime = 0;
+float lastTime = 0;
 
 void Window::windowResized( int width, int height)
 {
@@ -247,7 +258,7 @@ void Window::processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	}
 	// Camera movement
-	double timeNow = glfwGetTime();
+	float timeNow = (float)glfwGetTime();
 	float cameraMovement = CAMERA_SPEED * (timeNow - lastTime);
 	lastTime = timeNow;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="FrameCounter.cpp" />
     <ClCompile Include="glad\glad.c" />
     <ClCompile Include="Shader.cpp" />
@@ -29,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FontManager.h" />
     <ClInclude Include="FrameCounter.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Window.h" />
@@ -85,12 +87,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Software\glfw-3.3.2.bin.WIN32\include;C:\Software\glad-3.3\include;C:\Software\glm\include;C:\Software\stb_image;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Software\glfw-3.3.2.bin.WIN32\lib-vc2017;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Software\glfw-3.3.2.bin.WIN32\include;C:\Software\glad-3.3\include;C:\Software\glm\include;C:\Software\stb_image;C:\Software\freetype\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Software\glfw-3.3.2.bin.WIN32\lib-vc2017;C:\Software\freetype\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Software\glfw-3.3.2.bin.WIN32\include;C:\Software\glad-3.3\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Software\glfw-3.3.2.bin.WIN32\lib-vc2017;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Software\glfw-3.3.2.bin.WIN32\include;C:\Software\glad-3.3\include;C:\Software\glm\include;C:\Software\stb_image;C:\Software\freetype\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Software\glfw-3.3.2.bin.WIN32\lib-vc2017;C:\Software\freetype\win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -101,7 +103,7 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,7 +127,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

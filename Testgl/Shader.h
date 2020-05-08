@@ -13,8 +13,9 @@ class Shader
 public:
 	unsigned int ID; // Program ID
 
-	Shader(const char* vertexPath, const char* fragmentPath);
+	Shader();
 	~Shader();
+	void load(const char* vertexPath, const char* fragmentPath);
 	void use();
 	void setBool(const std::string &name, bool value) const;
 	void setInt(const std::string &name, int value) const;
@@ -23,5 +24,7 @@ public:
 
 private:
 	std::string readFile(const char* filePath);
-	void checkShaderErrors(unsigned int ID, const char* type);
+	bool checkShaderErrors(unsigned int ID, const char* type);
+	bool programLoaded = false;
+	
 };

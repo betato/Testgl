@@ -1,6 +1,17 @@
 #include "Shader.h"
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+Shader::Shader()
+{
+
+}
+
+Shader::~Shader()
+{
+	if (programLoaded)
+		glDeleteProgram(ID);
+}
+
+void Shader::load(const char* vertexPath, const char* fragmentPath)
 {
 	// Read files
 	std::string vertexStr = readFile(vertexPath);
@@ -23,15 +34,10 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	glAttachShader(ID, fragment);
 	glLinkProgram(ID);
 	// Check for linking errors
-	checkShaderErrors(ID, "PROGRAM");
+	programLoaded = checkShaderErrors(ID, "PROGRAM");
 	// Delete shaders as they are now linked to the program
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
-}
-
-Shader::~Shader()
-{
-	glDeleteProgram(ID);
 }
 
 std::string Shader::readFile(const char* filePath)
@@ -56,7 +62,7 @@ std::string Shader::readFile(const char* filePath)
 	return shaderCode;
 }
 
-void Shader::checkShaderErrors(unsigned int ID, const char* type)
+bool Shader::checkShaderErrors(unsigned int ID, const char* type)
 {
 	int success;
 	char infoLog[1024];
@@ -78,6 +84,7 @@ void Shader::checkShaderErrors(unsigned int ID, const char* type)
 			std::cerr << "ERROR::SHADER::" << type << "::COMPILATION_FAILED\n" << infoLog << std::endl;
 		}
 	}
+	return success;
 }
 
 void Shader::use()
