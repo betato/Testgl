@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "Entity.h"
 #include "TexturedModel.h"
+#include "TexturedEntity.h"
 
 Window::Window(int width, int height)
 {
@@ -55,7 +56,7 @@ void Window::init()
 
 void Window::run()
 {
-	// Vertex data and texture coords
+	// Load cube model
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -99,11 +100,9 @@ void Window::run()
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
-
-	TexturedModel cubey;
-	cubey.loadVertexData(vertices, 36);
-	cubey.loadTexture("../Testgl/res/texture/test.png");
-
+	TexturedModel cubeModel;
+	cubeModel.loadVertexData(vertices, 36);
+	cubeModel.loadTexture("../Testgl/res/texture/test.png");
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
@@ -116,6 +115,12 @@ void Window::run()
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
+	TexturedEntity cubes[10];
+	for (unsigned int i = 0; i < 10; i++)
+	{
+		cubes[i] = TexturedEntity(&cubeModel, cubePositions[i]);
+		cubes[i].updateModelMatrix();
+	}
 
 	// Load Shaders
 	fontShader.load("../Testgl/res/shader/text.vert", "../Testgl/res/shader/text.frag");
@@ -142,17 +147,13 @@ void Window::run()
 		simpleShader.setMat4("projection", projection);
 		simpleShader.setMat4("view", camera.getView());
 		// Draw scene
-		cubey.bind();
+		cubes[0].model->bind();
 		simpleShader.setInt("tex", 0);
 		
 		for (unsigned int i = 0; i < 10; i++)
 		{
-			glm::mat4 model(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			//float angle = 20.0f * i;
-			//model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			simpleShader.setMat4("model", model);
-			cubey.draw();
+			simpleShader.setMat4("model", cubes[i].modelMatrix);
+			cubes[i].model->draw();
 		}
 
 		// Draw text
