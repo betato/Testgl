@@ -5,6 +5,10 @@
 #include <stb_image.h>
 #include <iostream>
 
+#define VERTEX_LOACTION 0
+#define NORMAL_LOACTION 1
+#define TEXTURE_LOACTION 2
+
 TexturedModel::TexturedModel()
 {
 	
@@ -26,13 +30,16 @@ void TexturedModel::loadVertexData(float* vertices, int vertexCount)
 	glGenBuffers(1, &VBO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCount * 5, vertices, GL_STATIC_DRAW); // 5 floats per vertex (3 + 2 texture)
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCount * 8, vertices, GL_STATIC_DRAW); // 8 floats per vertex (3 + 3 normal + 2 texture)
 	// Position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(VERTEX_LOACTION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(VERTEX_LOACTION);
+	// Normals
+	glVertexAttribPointer(NORMAL_LOACTION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(NORMAL_LOACTION);
 	// Texture coords
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(TEXTURE_LOACTION, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(TEXTURE_LOACTION);
 	this->vertexCount = vertexCount;
 }
 

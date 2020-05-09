@@ -24,6 +24,8 @@
     <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="FrameCounter.cpp" />
     <ClCompile Include="glad\glad.c" />
+    <ClCompile Include="Light.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Testgl.cpp" />
@@ -36,6 +38,8 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="FontManager.h" />
     <ClInclude Include="FrameCounter.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="TexturedEntity.h" />

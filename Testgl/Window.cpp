@@ -11,6 +11,7 @@
 #include "Entity.h"
 #include "TexturedModel.h"
 #include "TexturedEntity.h"
+#include "Light.h"
 
 Window::Window(int width, int height)
 {
@@ -58,62 +59,69 @@ void Window::run()
 {
 	// Load cube model
 	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		// Z-
+		-0.5f, -0.5f, -0.5f,	0.0f, 0.0f, -1.0f,	0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,		0.0f, 0.0f, -1.0f,	1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f, -1.0f,	0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, 0.0f, -1.0f,	0.0f, 0.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		// Z+
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,	1.0f, 	0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,		0.0f, 0.0f,	1.0f, 	1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,		0.0f, 0.0f,	1.0f, 	1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,		0.0f, 0.0f,	1.0f, 	1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,	0.0f, 0.0f,	1.0f, 	0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,	1.0f, 	0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		// X-
+		-0.5f,  0.5f,  0.5f,	-1.0f, 0.0f, 0.0f, 	1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,	-1.0f, 0.0f, 0.0f, 	1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,	-1.0f, 0.0f, 0.0f, 	0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,	-1.0f, 0.0f, 0.0f, 	0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,	-1.0f, 0.0f, 0.0f, 	0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,	-1.0f, 0.0f, 0.0f, 	1.0f, 0.0f,
 
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		// X+
+		0.5f,  0.5f,  0.5f,		1.0f, 0.0f, 0.0f, 	1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,		1.0f, 0.0f, 0.0f, 	1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,		1.0f, 0.0f, 0.0f, 	0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,		1.0f, 0.0f, 0.0f, 	0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,		1.0f, 0.0f, 0.0f, 	0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,		1.0f, 0.0f, 0.0f, 	1.0f, 0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		// Y-
+		-0.5f, -0.5f, -0.5f,	0.0f, -1.0f, 0.0f, 	0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,		0.0f, -1.0f, 0.0f, 	1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,		0.0f, -1.0f, 0.0f, 	1.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,		0.0f, -1.0f, 0.0f, 	1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f, -1.0f, 0.0f, 	0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, -1.0f, 0.0f, 	0.0f, 1.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		// Y+
+		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,		0.0f, 1.0f,	0.0f, 	1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,		0.0f, 1.0f,	0.0f, 	1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,		0.0f, 1.0f,	0.0f, 	1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 1.0f
 	};
 	TexturedModel cubeModel;
 	cubeModel.loadVertexData(vertices, 36);
-	cubeModel.loadTexture("../Testgl/res/texture/test.png");
+	//cubeModel.loadTexture("../Testgl/res/texture/test.png");
+	cubeModel.loadTexture("../Testgl/res/texture/3crates/crate1/crate1_diffuse.png");
 	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(2.0f,  0.0f,  0.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(-3.8f, -2.0f, -9.0f),
 		glm::vec3(2.4f, -0.4f, -3.5f),
 		glm::vec3(-1.7f,  3.0f, -7.5f),
 		glm::vec3(1.3f, -2.0f, -2.5f),
 		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
+		glm::vec3(-1.3f,  1.0f, -1.5f),
+		glm::vec3(0.0f,  0.0f, -15.0f)
 	};
 	TexturedEntity cubes[10];
 	for (unsigned int i = 0; i < 10; i++)
@@ -121,11 +129,17 @@ void Window::run()
 		cubes[i] = TexturedEntity(&cubeModel, cubePositions[i]);
 		cubes[i].updateModelMatrix();
 	}
+	cubes[9].scale = glm::vec3(40.0f, 40.0f, 1.0f);
+	cubes[9].updateModelMatrix();
+
+	// Set up lights
+	Light light1(glm::vec3(1.0f, 1.0f, 1.0f));
+	light1.position = glm::vec3(-10.0f, 2.0f, 10.0f);
 
 	// Load Shaders
 	fontShader.load("../Testgl/res/shader/text.vert", "../Testgl/res/shader/text.frag");
 	simpleShader.load("../Testgl/res/shader/simple.vert", "../Testgl/res/shader/simple.frag");
-
+	
 	// Capture cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glm::quat rotation = glm::angleAxis(0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -140,8 +154,12 @@ void Window::run()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		// Camera
 		simpleShader.use();
+		// Lighting
+		simpleShader.setVec3("lightColor", light1.color);
+		simpleShader.setVec3("lightPos", light1.position);
+		simpleShader.setVec3("viewPos", camera.position);
+		// Camera
 		glm::mat4 projection(1.0f);
 		projection = glm::perspective(glm::radians(camera.fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		simpleShader.setMat4("projection", projection);
@@ -166,6 +184,7 @@ void Window::run()
 		fontManager.drawText("up: " + glm::to_string(camera.up), 25.0f, 150.0f, 0.5f);
 		fontManager.drawText("right: " + glm::to_string(camera.right), 25.0f, 125.0f, 0.5f);
 		fontManager.drawText("front: " + glm::to_string(camera.forward), 25.0f, 100.0f, 0.5f);
+		fontManager.drawText("fov: " + std::to_string(camera.fov), 25.0f, 75.0f, 0.5f);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -207,9 +226,9 @@ void Window::mouseMoved(double xpos, double ypos)
 
 	if (cursorCaptured) {
 		// Yaw then rotate -> yaw should be independent of existing rotation (this prevents the camera from rolling)
-		camera.rotation = camera.rotation * glm::angleAxis(glm::radians(xoffset * MOUSE_SENSITIVITY), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.rotateAbsolute(glm::vec3(0.0f, 0.0f, 1.0f), glm::radians(xoffset * MOUSE_SENSITIVITY));
 		// Rotate then pitch -> pitch should add to existing pitch
-		camera.rotation = glm::angleAxis(glm::radians(yoffset * MOUSE_SENSITIVITY), glm::vec3(0.0f, 1.0f, 0.0f)) * camera.rotation;
+		camera.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(yoffset * MOUSE_SENSITIVITY));
 		
 		// Make sure screen doesn't get flipped by clamping pitch
 		/*if (camera.rotation.y > 89.0f)
@@ -223,12 +242,12 @@ void Window::mouseMoved(double xpos, double ypos)
 
 void Window::mouseScrolled(double xoffset, double yoffset)
 {
-	if (camera.fov >= 1.0f && camera.fov <= 75.0f)
+	if (camera.fov >= 1.0f && camera.fov <= 120.0f)
 		camera.fov -= (float)yoffset;
 	if (camera.fov <= 1.0f)
 		camera.fov = 1.0f;
-	if (camera.fov >= 75.0f)
-		camera.fov = 75.0f;
+	if (camera.fov >= 120.0f)
+		camera.fov = 120.0f;
 	//camera.rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(yoffset * 5.0f)); // Roll
 	camera.updateDirection();
 }
