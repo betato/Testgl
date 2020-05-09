@@ -4,8 +4,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <stb_image.h>
+#include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "Shader.h"
+#include "Entity.h"
 
 Window::Window(int width, int height)
 {
@@ -51,7 +54,7 @@ void Window::init()
 
 void Window::run()
 {
-	// Vertex and position data
+	// Vertex data and texture coords
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -95,6 +98,7 @@ void Window::run()
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
+
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
 		glm::vec3(2.0f,  5.0f, -15.0f),
@@ -119,7 +123,7 @@ void Window::run()
 	// Texture coords
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-
+	
 	// Load texture
 	unsigned int tex;
 	glGenTextures(1, &tex);
@@ -151,6 +155,7 @@ void Window::run()
 
 	// Capture cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glm::quat rotation = glm::angleAxis(0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
@@ -164,7 +169,7 @@ void Window::run()
 		
 		// Camera
 		simpleShader.use();
-		glm::mat4 projection = glm::mat4(1.0f);
+		glm::mat4 projection(1.0f);
 		projection = glm::perspective(glm::radians(camera.fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		simpleShader.setMat4("projection", projection);
 		simpleShader.setMat4("view", camera.getView());
@@ -172,21 +177,40 @@ void Window::run()
 		glBindVertexArray(VAO);
 		glBindTexture(GL_TEXTURE_2D, tex);
 		simpleShader.setInt("tex", 0);
+		
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			// calculate the model matrix for each object and pass it to shader before drawing
-			glm::mat4 model = glm::mat4(1.0f);
+			glm::mat4 model(1.0f);
 			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			//float angle = 20.0f * i;
+			//model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			simpleShader.setMat4("model", model);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
+		//glm::vec3 position(0.0f, 0.0f, 0.0f);
+		////glm::vec3 position(0.5f*glfwGetTime(), 0.0f, 0.0f);
+		////glm::vec3 position(0.0f, 0.5f*glfwGetTime(), 0.0f);
+		////glm::vec3 position(0.0f, 0.0f, 0.5f*glfwGetTime());
+
+		////rotation = glm::angleAxis(0.01f, glm::vec3(0.0f, 1.0f, 0.0f)) * rotation;
+
+		//glm::mat4 model = glm::translate(glm::mat4(1.0f), position); //*glm::toMat4(rotation);
+
+		//simpleShader.setMat4("model", model);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		// Draw text
 		fontShader.use();
 		fontShader.setMat4("projection", glm::ortho(0.0f, (float)screenWidth, 0.0f, (float)screenHeight));
 		glUniform3f(glGetUniformLocation(fontShader.ID, "textColor"), 1.0f, 1.0f, 1.0f);
-		fontManager.drawText(std::to_string(frameCounter.fps), 25.0f, 25.0f, 0.5f);
+		//fontManager.drawText(std::to_string(frameCounter.fps), 25.0f, 100.0f, 0.5f);
+		fontManager.drawText("pos: " + glm::to_string(camera.position), 25.0f, 200.0f, 0.5f);
+		fontManager.drawText("rot: " + glm::to_string(camera.rotation), 25.0f, 175.0f, 0.5f);
+		fontManager.drawText("up: " + glm::to_string(camera.up), 25.0f, 150.0f, 0.5f);
+		fontManager.drawText("right: " + glm::to_string(camera.right), 25.0f, 125.0f, 0.5f);
+		fontManager.drawText("front: " + glm::to_string(camera.forward), 25.0f, 100.0f, 0.5f);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -229,14 +253,16 @@ void Window::mouseMoved(double xpos, double ypos)
 	lastY = ypos;
 
 	if (cursorCaptured) {
-		camera.rotation.z += glm::radians(xoffset * MOUSE_SENSITIVITY); // Yaw
-		camera.rotation.y += glm::radians(yoffset * MOUSE_SENSITIVITY); // Pitch
+		// Yaw then rotate -> yaw should be independent of existing rotation (this prevents the camera from rolling)
+		camera.rotation = camera.rotation * glm::angleAxis(glm::radians(xoffset * MOUSE_SENSITIVITY), glm::vec3(0.0f, 0.0f, 1.0f));
+		// Rotate then pitch -> pitch should add to existing pitch
+		camera.rotation = glm::angleAxis(glm::radians(yoffset * MOUSE_SENSITIVITY), glm::vec3(0.0f, 1.0f, 0.0f)) * camera.rotation;
 		
 		// Make sure screen doesn't get flipped by clamping pitch
-		if (camera.rotation.y > 89.0f)
+		/*if (camera.rotation.y > 89.0f)
 			camera.rotation.y = 89.0f;
 		if (camera.rotation.y < -89.0f)
-			camera.rotation.y = -89.0f;
+			camera.rotation.y = -89.0f;*/
 
 		camera.updateDirection();
 	}
@@ -250,6 +276,8 @@ void Window::mouseScrolled(double xoffset, double yoffset)
 		camera.fov = 1.0f;
 	if (camera.fov >= 75.0f)
 		camera.fov = 75.0f;
+	//camera.rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(yoffset * 5.0f)); // Roll
+	camera.updateDirection();
 }
 
 void Window::processInput(GLFWwindow* window)
@@ -262,17 +290,23 @@ void Window::processInput(GLFWwindow* window)
 	float cameraMovement = CAMERA_SPEED * (timeNow - lastTime);
 	lastTime = timeNow;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.position += cameraMovement * camera.front;
+		camera.position += cameraMovement * camera.forward;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.position -= cameraMovement * camera.front;
+		camera.position -= cameraMovement * camera.forward;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.position -= glm::normalize(glm::cross(camera.front, camera.up)) * cameraMovement;
+		camera.position -= glm::normalize(glm::cross(camera.forward, camera.up)) * cameraMovement;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.position += glm::normalize(glm::cross(camera.front, camera.up)) * cameraMovement;
+		camera.position += glm::normalize(glm::cross(camera.forward, camera.up)) * cameraMovement;
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		camera.position += cameraMovement * camera.up;
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 		camera.position -= cameraMovement * camera.up;
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+	{
+		camera.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		camera.updateDirection();
+	}
+		
 	// Cursor capture
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
 		spaceDown = false;

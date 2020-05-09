@@ -1,7 +1,7 @@
 #include "FontManager.h"
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <GLFW/glfw3.h> 
 #include <iostream>
 
 #define NUM_CHARS 128
