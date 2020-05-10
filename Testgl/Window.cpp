@@ -76,7 +76,7 @@ void Window::run()
 	// Done - Materials
 	// Done - Point light
 	// - Spot Light
-	// - Global (Sun) Light
+	// Done - Global (Sun) Light
 	// - Specular map
 	// - Normal Map
 	// - Height Map
@@ -110,7 +110,10 @@ void Window::run()
 	light1.scale = glm::vec3(0.25f);
 	light1.updateModelMatrix();
 
-	SunLight sunLight(glm::vec3(0.4f, 0.4f, 0.4f));
+	// SunLight shining down, slightly from x,-y
+	SunLight sunLight(glm::vec3(0.1f, 0.1f, 0.1f));
+	sunLight.rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-75.0f));
+	sunLight.rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(15.0f));
 
 	// Load cube model
 	float vertices[] = {
@@ -185,7 +188,7 @@ void Window::run()
 	}
 	cubes[9].scale = glm::vec3(40.0f, 40.0f, 1.0f);
 	cubes[9].updateModelMatrix();
-	// Brass
+	//Brass
 	//Material cubeMaterial(
 	//	glm::vec3(0.329412f, 0.223529f, 0.027451f), // Ambient
 	//	glm::vec3(0.780392f, 0.568627f, 0.113725f), // Diffuse

@@ -6,6 +6,6 @@
 
 void SunLight::setShaderUniforms(Shader& shader)
 {
-	shader.setVec3("pointLight.color", color);
-	shader.setVec3("pointLight.direction", rotation * glm::vec3(0.0f, 0.0f, -1.0f)); // Default (un-rotated) direction is down (negative z)
+	shader.setVec3("sunLight.color", color);
+	shader.setVec3("sunLight.direction", glm::vec3(1.0f, 0.0f, 0.0f) * rotation); // Default (un-rotated) direction is forwards (negative x)
 }
