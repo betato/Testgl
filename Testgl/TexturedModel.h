@@ -1,19 +1,21 @@
 #pragma once
-class TexturedModel
+#include <glad/glad.h>
+
+#include "Model.h"
+
+class TexturedModel : public Model
 {
 public:
 	TexturedModel();
 	~TexturedModel();
-	
-	void loadVertexData(float* vertices, int vertexCount);
+
+	void loadVertexNormalTexture(float* vertices, int vertexCount, GLenum usage);
 	void loadTexture(const char* path);
 	void bind();
-	void draw();
+
+	bool texturesLoaded = false;
 
 private:
-	int vertexCount;
-
-	unsigned int VBO;
-	unsigned int VAO;
 	unsigned int textureID;
+
 };

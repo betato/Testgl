@@ -46,6 +46,7 @@ private:
 
 	Shader simpleShader;
 	Shader fontShader;
+	Shader lightSourceShader;
 
 	int screenWidth;
 	int screenHeight;

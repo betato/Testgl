@@ -1,5 +1,6 @@
 #include "Window.h"
 
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -9,8 +10,9 @@
 
 #include "Shader.h"
 #include "Entity.h"
+#include "Model.h"
 #include "TexturedModel.h"
-#include "TexturedEntity.h"
+#include "ColoredModel.h"
 #include "Light.h"
 
 Window::Window(int width, int height)
@@ -57,6 +59,37 @@ void Window::init()
 
 void Window::run()
 {
+	// TODO: Move model management to separate class with entities organized based on model
+
+
+	float lightCubeVerticies[] = {
+		-0.5f, -0.5f, -0.5f,	
+		 0.5f, -0.5f, -0.5f,	
+		 0.5f,  0.5f, -0.5f,	
+		-0.5f,  0.5f, -0.5f,	
+		-0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f
+	};
+	unsigned int lightCubeIndicies[] = {
+		0, 1, 3, 3, 1, 2,
+		1, 5, 2, 2, 5, 6,
+		5, 4, 6, 6, 4, 7,
+		4, 0, 7, 7, 0, 3,
+		3, 2, 7, 7, 2, 6,
+		4, 5, 0, 0, 5, 1
+	};
+	// Set up lights
+	//ColoredModel lightModel;
+	Model lightModel;
+	lightModel.loadVertex(lightCubeVerticies, 8, 3, GL_STATIC_DRAW);
+	lightModel.loadIndices(lightCubeIndicies, 36, GL_STATIC_DRAW);
+	Light light1(glm::vec3(1.0f, 1.0f, 1.0f));
+	light1.position = glm::vec3(-2.0f, 2.0f, -1.0f);
+	light1.scale = glm::vec3(0.25f);
+	light1.updateModelMatrix();
+
 	// Load cube model
 	float vertices[] = {
 		// Z-
@@ -108,7 +141,7 @@ void Window::run()
 		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 1.0f
 	};
 	TexturedModel cubeModel;
-	cubeModel.loadVertexData(vertices, 36);
+	cubeModel.loadVertexNormalTexture(vertices, 36, GL_STATIC_DRAW);
 	//cubeModel.loadTexture("../Testgl/res/texture/test.png");
 	cubeModel.loadTexture("../Testgl/res/texture/3crates/crate1/crate1_diffuse.png");
 	glm::vec3 cubePositions[] = {
@@ -123,23 +156,22 @@ void Window::run()
 		glm::vec3(-1.3f,  1.0f, -1.5f),
 		glm::vec3(0.0f,  0.0f, -15.0f)
 	};
-	TexturedEntity cubes[10];
+	Entity cubes[10];
 	for (unsigned int i = 0; i < 10; i++)
 	{
-		cubes[i] = TexturedEntity(&cubeModel, cubePositions[i]);
+		cubes[i] = Entity(cubePositions[i]);
 		cubes[i].updateModelMatrix();
 	}
 	cubes[9].scale = glm::vec3(40.0f, 40.0f, 1.0f);
 	cubes[9].updateModelMatrix();
-
-	// Set up lights
-	Light light1(glm::vec3(1.0f, 1.0f, 1.0f));
-	light1.position = glm::vec3(-10.0f, 2.0f, 10.0f);
+	
+	
 
 	// Load Shaders
 	fontShader.load("../Testgl/res/shader/text.vert", "../Testgl/res/shader/text.frag");
 	simpleShader.load("../Testgl/res/shader/simple.vert", "../Testgl/res/shader/simple.frag");
-	
+	lightSourceShader.load("../Testgl/res/shader/lightsource.vert", "../Testgl/res/shader/lightsource.frag");
+
 	// Capture cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glm::quat rotation = glm::angleAxis(0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -165,14 +197,21 @@ void Window::run()
 		simpleShader.setMat4("projection", projection);
 		simpleShader.setMat4("view", camera.getView());
 		// Draw scene
-		cubes[0].model->bind();
+		cubeModel.bind();
 		simpleShader.setInt("tex", 0);
 		
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			simpleShader.setMat4("model", cubes[i].modelMatrix);
-			cubes[i].model->draw();
+			cubeModel.draw();
 		}
+		// Light entities
+		lightSourceShader.use();
+		lightSourceShader.setMat4("projection", projection);
+		lightSourceShader.setMat4("view", camera.getView());
+		lightSourceShader.setMat4("model", light1.modelMatrix);
+		lightModel.bind();
+		lightModel.drawIndices();
 
 		// Draw text
 		fontShader.use();

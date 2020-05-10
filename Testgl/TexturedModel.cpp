@@ -5,8 +5,6 @@
 #include <stb_image.h>
 #include <iostream>
 
-#define VERTEX_LOACTION 0
-#define NORMAL_LOACTION 1
 #define TEXTURE_LOACTION 2
 
 TexturedModel::TexturedModel()
@@ -16,39 +14,21 @@ TexturedModel::TexturedModel()
 
 TexturedModel::~TexturedModel()
 {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteTextures(1, &textureID);
+	if (texturesLoaded)
+		glDeleteTextures(1, &textureID);
 }
 
-void TexturedModel::loadVertexData(float* vertices, int vertexCount)
+void TexturedModel::loadVertexNormalTexture(float* vertices, int vertexCount, GLenum usage)
 {
-	// TODO:
-	// Add support for index buffers
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCount * 8, vertices, GL_STATIC_DRAW); // 8 floats per vertex (3 + 3 normal + 2 texture)
-	// Position
-	glVertexAttribPointer(VERTEX_LOACTION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(VERTEX_LOACTION);
-	// Normals
-	glVertexAttribPointer(NORMAL_LOACTION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(NORMAL_LOACTION);
-	// Texture coords
+	// Load verticies and normals
+	Model::loadVertexNormal(vertices, vertexCount, 8, usage);
+	// Load texture coords 6=3+3, 8=3+3+2
 	glVertexAttribPointer(TEXTURE_LOACTION, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(TEXTURE_LOACTION);
-	this->vertexCount = vertexCount;
 }
 
 void TexturedModel::loadTexture(const char* path)
 {
-	// TODO:
-	// Move texture loading and storage somewhere else
-	// Render all models with identical textures together
-
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	// Texture wrapping
@@ -75,11 +55,6 @@ void TexturedModel::loadTexture(const char* path)
 
 void TexturedModel::bind()
 {
-	glBindVertexArray(VAO);
+	Model::bind();
 	glBindTexture(GL_TEXTURE_2D, textureID);
-}
-
-void TexturedModel::draw()
-{
-	glDrawArrays(GL_TRIANGLES, 0, 36);
 }

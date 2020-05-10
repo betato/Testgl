@@ -19,35 +19,37 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="Testgl.rc" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ColoredModel.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="FrameCounter.cpp" />
     <ClCompile Include="glad\glad.c" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Testgl.cpp" />
-    <ClCompile Include="TexturedEntity.cpp" />
     <ClCompile Include="TexturedModel.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ColoredModel.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="FontManager.h" />
     <ClInclude Include="FrameCounter.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="TexturedEntity.h" />
     <ClInclude Include="TexturedModel.h" />
     <ClInclude Include="Window.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Testgl.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
