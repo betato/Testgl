@@ -12,22 +12,15 @@ Entity::Entity(glm::vec3 position, glm::vec3 rotation) :
 Entity::Entity(glm::vec3 position, glm::quat rotation) : 
 	Entity(position, rotation, glm::vec3(1.0f)) { }
 
-Entity::Entity(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
+Entity::Entity(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : position(position), scale(scale)
 {
-	this->position = position;
-	this->scale = scale;
-
 	rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), rotation.x);
 	rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), rotation.y);
 	rotateAbsolute(glm::vec3(0.0f, 0.0f, 1.0f), rotation.z);
 }
 
-Entity::Entity(glm::vec3 position, glm::quat rotation, glm::vec3 scale)
-{
-	this->position = position;
-	this->rotation = rotation;
-	this->scale = scale;
-}
+Entity::Entity(glm::vec3 position, glm::quat rotation, glm::vec3 scale) : 
+	position(position), rotation(rotation), scale(scale) { }
 
 Entity::~Entity()
 {

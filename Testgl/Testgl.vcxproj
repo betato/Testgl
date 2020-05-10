@@ -44,6 +44,7 @@
     <ClInclude Include="FontManager.h" />
     <ClInclude Include="FrameCounter.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="resource.h" />

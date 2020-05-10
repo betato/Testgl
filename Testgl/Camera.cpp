@@ -3,9 +3,8 @@
 
 Camera::Camera() : Camera(glm::vec3(), glm::vec3(), 45.0f) { }
 
-Camera::Camera(glm::vec3 position, glm::quat rotation, float fov) : Entity(position, rotation, glm::vec3(1.0f))
+Camera::Camera(glm::vec3 position, glm::quat rotation, float fov) : Entity(position, rotation, glm::vec3(1.0f)), fov(fov)
 {
-	this->fov = fov;
 	updateDirection();
 }
 
