@@ -1,11 +1,12 @@
 #pragma once
 #include "Light.h"
 #include "Shader.h"
+#include <glm/glm.hpp>
 
 class PointLight : public Light
 {
 public:
-	using Light::Light;
+	PointLight();
 	PointLight(glm::vec3 color, float constant, float linear, float quadratic);
 	virtual void setShaderUniforms(Shader& shader) override;
 

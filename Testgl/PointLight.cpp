@@ -1,6 +1,8 @@
 #include "PointLight.h"
 #include "Shader.h"
 
+PointLight::PointLight() { }
+
 PointLight::PointLight(glm::vec3 color, float constant, float linear, float quadratic) : 
 	Light(color), constant(constant), linear(linear), quadratic(quadratic) { }
 

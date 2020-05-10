@@ -4,6 +4,10 @@
 
 #include "Shader.h"
 
+SunLight::SunLight() { }
+
+SunLight::SunLight(glm::vec3 color) : Light(color) { }
+
 void SunLight::setShaderUniforms(Shader& shader)
 {
 	shader.setVec3("sunLight.color", color);

@@ -6,6 +6,7 @@
 class SunLight : public Light
 {
 public:
-	using Light::Light;
+	SunLight();
+	SunLight(glm::vec3 color);
 	virtual void setShaderUniforms(Shader& shader) override;
 };

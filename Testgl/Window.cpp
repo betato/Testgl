@@ -17,6 +17,7 @@
 #include "Material.h"
 #include "PointLight.h"
 #include "SunLight.h"
+#include "SpotLight.h"
 
 Window::Window(int width, int height)
 {
@@ -102,7 +103,6 @@ void Window::run()
 	};
 	// Set up lights
 	Model lightCubeModel;
-	// http://www.it.hiof.no/~borres/j3d/explain/light/p-materials.html
 	lightCubeModel.loadVertex(lightCubeVerticies, 8, 3, GL_STATIC_DRAW);
 	lightCubeModel.loadIndices(lightCubeIndicies, 36, GL_STATIC_DRAW);
 	PointLight light1(glm::vec3(1.0f), 1.0f, 0.1f, 0.03f);
@@ -111,9 +111,12 @@ void Window::run()
 	light1.updateModelMatrix();
 
 	// SunLight shining down, slightly from x,-y
-	SunLight sunLight(glm::vec3(0.1f, 0.1f, 0.1f));
+	SunLight sunLight(glm::vec3(0.2f, 0.2f, 0.2f));
 	sunLight.rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-75.0f));
 	sunLight.rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(15.0f));
+
+	// SpotLight (a bit orangeish)
+	SpotLight spotLight(glm::vec3(1.0f, 0.9f, 0.8f), 1.0f, 0.8f, 0.04f, glm::cos(glm::radians(12.0f)), glm::cos(glm::radians(20.0f)));
 
 	// Load cube model
 	float vertices[] = {
@@ -188,6 +191,9 @@ void Window::run()
 	}
 	cubes[9].scale = glm::vec3(40.0f, 40.0f, 1.0f);
 	cubes[9].updateModelMatrix();
+
+	// http://www.it.hiof.no/~borres/j3d/explain/light/p-materials.html
+
 	//Brass
 	//Material cubeMaterial(
 	//	glm::vec3(0.329412f, 0.223529f, 0.027451f), // Ambient
@@ -224,6 +230,9 @@ void Window::run()
 		// Lighting
 		sunLight.setShaderUniforms(simpleShader);
 		light1.setShaderUniforms(simpleShader);
+		spotLight.position = camera.position;
+		spotLight.rotation = camera.rotation;
+		spotLight.setShaderUniforms(simpleShader);
 		simpleShader.setVec3("viewPos", camera.position);
 		// Camera
 		glm::mat4 projection(1.0f);
