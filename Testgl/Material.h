@@ -17,7 +17,7 @@ struct Material
 	Material(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float shine) :
 		ambient(ambient), diffuse(diffuse), specular(specular), shine(shine) { }
 
-	void setShader(Shader& shader)
+	void setShaderUniforms(Shader& shader)
 	{
 		shader.setVec3("material.ambient", ambient);
 		shader.setVec3("material.diffuse", diffuse);

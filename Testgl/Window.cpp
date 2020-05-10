@@ -15,6 +15,8 @@
 #include "ColoredModel.h"
 #include "Light.h"
 #include "Material.h"
+#include "PointLight.h"
+#include "SunLight.h"
 
 Window::Window(int width, int height)
 {
@@ -61,16 +63,23 @@ void Window::init()
 void Window::run()
 {
 	// TODO: Move model management to separate class with entities organized based on model
+	// Each entity has:
+	//	- Entity
+	//	- Material
+	//	- Texture (optional)
+	//  - Colored verticies (optional)
+	// Lights should also exist here
+	// 
 
 	// TODO: Lighting
 	// 
-	// Materials
-	// Point light
-	// Spot Light
-	// Global (Sun) Light
-	// Specular map
-	// Normal Map
-	// Height Map
+	// Done - Materials
+	// Done - Point light
+	// - Spot Light
+	// - Global (Sun) Light
+	// - Specular map
+	// - Normal Map
+	// - Height Map
 	// 
 
 	float lightCubeVerticies[] = {
@@ -96,10 +105,12 @@ void Window::run()
 	// http://www.it.hiof.no/~borres/j3d/explain/light/p-materials.html
 	lightCubeModel.loadVertex(lightCubeVerticies, 8, 3, GL_STATIC_DRAW);
 	lightCubeModel.loadIndices(lightCubeIndicies, 36, GL_STATIC_DRAW);
-	Light light1(glm::vec3(1.0f, 1.0f, 1.0f));
+	PointLight light1(glm::vec3(1.0f), 1.0f, 0.1f, 0.03f);
 	light1.position = glm::vec3(-2.0f, 2.0f, -1.0f);
 	light1.scale = glm::vec3(0.25f);
 	light1.updateModelMatrix();
+
+	SunLight sunLight(glm::vec3(0.4f, 0.4f, 0.4f));
 
 	// Load cube model
 	float vertices[] = {
@@ -174,11 +185,18 @@ void Window::run()
 	}
 	cubes[9].scale = glm::vec3(40.0f, 40.0f, 1.0f);
 	cubes[9].updateModelMatrix();
+	// Brass
+	//Material cubeMaterial(
+	//	glm::vec3(0.329412f, 0.223529f, 0.027451f), // Ambient
+	//	glm::vec3(0.780392f, 0.568627f, 0.113725f), // Diffuse
+	//	glm::vec3(0.992157f, 0.941176f, 0.807843f), // Specular
+	//	27.8974f); // Shine
+
 	Material cubeMaterial(
-		glm::vec3(0.329412f, 0.223529f, 0.027451f), // Ambient
-		glm::vec3(0.780392f, 0.568627f, 0.113725f), // Diffuse
-		glm::vec3(0.992157f, 0.941176f, 0.807843f), // Specular
-		27.8974f); // Shine
+		glm::vec3(0.1f, 0.1f, 0.1f), // Ambient
+		glm::vec3(0.9f, 0.9f, 0.9f), // Diffuse
+		glm::vec3(0.3f, 0.3f, 0.3f), // Specular
+		8.0f); // Shine
 
 	// Load Shaders
 	fontShader.load("../Testgl/res/shader/text.vert", "../Testgl/res/shader/text.frag");
@@ -201,15 +219,15 @@ void Window::run()
 		
 		simpleShader.use();
 		// Lighting
-		simpleShader.setVec3("lightColor", light1.color);
-		simpleShader.setVec3("lightPos", light1.position);
+		sunLight.setShaderUniforms(simpleShader);
+		light1.setShaderUniforms(simpleShader);
 		simpleShader.setVec3("viewPos", camera.position);
 		// Camera
 		glm::mat4 projection(1.0f);
 		projection = glm::perspective(glm::radians(camera.fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 		simpleShader.setMat4("projection", projection);
 		simpleShader.setMat4("view", camera.getView());
-		cubeMaterial.setShader(simpleShader);
+		cubeMaterial.setShaderUniforms(simpleShader);
 		// Draw scene
 		cubeModel.bind();
 		simpleShader.setInt("tex", 0);
