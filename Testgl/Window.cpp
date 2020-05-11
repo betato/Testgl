@@ -74,11 +74,12 @@ void Window::run()
 
 	// TODO: Lighting
 	// 
+	// - Multiple lights
 	// Done - Materials
 	// Done - Point light
-	// - Spot Light
+	// Done - Spot Light
 	// Done - Global (Sun) Light
-	// - Specular map
+	// Done - Specular map
 	// - Normal Map
 	// - Height Map
 	// 
@@ -170,7 +171,9 @@ void Window::run()
 	};
 	TexturedModel cubeModel;
 	cubeModel.loadVertexNormalTexture(vertices, 36, GL_STATIC_DRAW);
-	cubeModel.loadTexture("../Testgl/res/texture/3crates/crate1/crate1_diffuse.png");
+	//cubeModel.loadTexture("../Testgl/res/texture/3crates/crate1/crate1_diffuse.png");
+	cubeModel.loadTexture("../Testgl/res/texture/cobblestone/diffuse.png", TexturedModel::DIFFUSE);
+	cubeModel.loadTexture("../Testgl/res/texture/cobblestone/specular.png", TexturedModel::SPECULAR);
 	glm::vec3 cubePositions[] = {
 		glm::vec3(2.0f,  0.0f,  0.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
@@ -203,8 +206,8 @@ void Window::run()
 
 	Material cubeMaterial(
 		glm::vec3(0.1f, 0.1f, 0.1f), // Ambient
-		glm::vec3(0.9f, 0.9f, 0.9f), // Diffuse
-		glm::vec3(0.3f, 0.3f, 0.3f), // Specular
+		glm::vec3(0.7f, 0.7f, 0.7f), // Diffuse
+		glm::vec3(0.7f, 0.7f, 0.7f), // Specular
 		8.0f); // Shine
 
 	// Load Shaders
@@ -241,8 +244,8 @@ void Window::run()
 		simpleShader.setMat4("view", camera.getView());
 		cubeMaterial.setShaderUniforms(simpleShader);
 		// Draw scene
-		cubeModel.bind();
-		simpleShader.setInt("tex", 0);
+		cubeModel.bind(simpleShader);
+		
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			simpleShader.setMat4("model", cubes[i].modelMatrix);

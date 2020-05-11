@@ -5,7 +5,9 @@
 #include <stb_image.h>
 #include <iostream>
 
-#define TEXTURE_LOACTION 2
+#include "Shader.h"
+
+#define TEXTURE_COORD_LOACTION 2
 
 TexturedModel::TexturedModel()
 {
@@ -14,8 +16,11 @@ TexturedModel::TexturedModel()
 
 TexturedModel::~TexturedModel()
 {
-	if (texturesLoaded)
-		glDeleteTextures(1, &textureID);
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		if (textureLoaded[i])
+			glDeleteTextures(1, &textureID[i]);
+	}		
 }
 
 void TexturedModel::loadVertexNormalTexture(float* vertices, int vertexCount, GLenum usage)
@@ -23,14 +28,14 @@ void TexturedModel::loadVertexNormalTexture(float* vertices, int vertexCount, GL
 	// Load verticies and normals
 	Model::loadVertexNormal(vertices, vertexCount, 8, usage);
 	// Load texture coords 6=3+3, 8=3+3+2
-	glVertexAttribPointer(TEXTURE_LOACTION, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(TEXTURE_LOACTION);
+	glVertexAttribPointer(TEXTURE_COORD_LOACTION, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(TEXTURE_COORD_LOACTION);
 }
 
-void TexturedModel::loadTexture(const char* path)
+void TexturedModel::loadTexture(const char* path, TextureType textureType)
 {
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
+	glGenTextures(1, &textureID[textureType]);
+	glBindTexture(GL_TEXTURE_2D, textureID[textureType]);
 	// Texture wrapping
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -45,6 +50,7 @@ void TexturedModel::loadTexture(const char* path)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		textureLoaded[textureType] = true;
 	}
 	else
 	{
@@ -53,8 +59,19 @@ void TexturedModel::loadTexture(const char* path)
 	stbi_image_free(image);
 }
 
-void TexturedModel::bind()
+void TexturedModel::bind(Shader& shader)
 {
 	Model::bind();
-	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	// Loop through diffuse, specular, normal, height
+	const char* samplerNames[] = { "texDiffuse", "texSpecular", "texNormal", "texHeight" };
+	for (unsigned int i = 0; i < 4; i++)
+	{
+		if (textureLoaded[i])
+		{
+			shader.setInt(samplerNames[i], i); // Point sampler2D to texture unit
+			glActiveTexture(GL_TEXTURE0 + i); // Make new texture unit active to bind new texture
+			glBindTexture(GL_TEXTURE_2D, textureID[i]); // Bind texture to unit
+		}
+	}
 }

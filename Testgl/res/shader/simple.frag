@@ -32,8 +32,11 @@ uniform Material material;
 uniform PointLight pointLight;
 uniform SunLight sunLight;
 uniform SpotLight spotLight;
-uniform sampler2D tex;
 uniform vec3 viewPos;
+
+uniform sampler2D texDiffuse;
+uniform sampler2D texSpecular;
+
 
 in vec3 Normal;
 in vec2 TexCoord;
@@ -41,19 +44,19 @@ in vec3 FragPos;
 
 out vec4 FragColor;
 
-vec3 calcSunLight(SunLight light, vec3 normal, vec3 viewDir)
+vec4 calcSunLight(SunLight light, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = normalize(-light.direction);
     vec3 reflectDir = reflect(-lightDir, normal);
 
     vec3 ambient  = light.color * material.ambient;
     vec3 diffuse = light.color * material.diffuse * max(dot(normal, lightDir), 0.0);
-    vec3 specular = light.color * material.specular * pow(max(dot(viewDir, reflectDir), 0.0), material.shine);
+    vec4 specular = vec4(light.color * material.specular * pow(max(dot(viewDir, reflectDir), 0.0), material.shine), 1.0) * texture(texSpecular, TexCoord);
     
-	return ambient + diffuse + specular;
+	return vec4(ambient + diffuse, 1.0) * texture(texDiffuse, TexCoord) + specular;
 }
 
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir)
+vec4 calcPointLight(PointLight light, vec3 normal, vec3 viewDir)
 {
     float lightDistance = length(light.position - FragPos);
 	float attenuation = 1.0 / (light.constant + light.linear * lightDistance + light.quadratic * lightDistance * lightDistance);    
@@ -64,12 +67,12 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir)
 	vec3 diffuse = max(dot(normal, lightDir), 0.0) * material.diffuse * light.color * attenuation;
 
 	vec3 reflectDir = reflect(-lightDir, normal);
-	vec3 specular = material.specular * pow(max(dot(viewDir, reflectDir), 0.0), material.shine) * light.color * attenuation;
+	vec4 specular = vec4(material.specular * pow(max(dot(viewDir, reflectDir), 0.0), material.shine) * light.color * attenuation, 1.0) * texture(texSpecular, TexCoord);
 
-	return ambient + specular + diffuse;
+	return vec4(ambient + diffuse, 1.0) * texture(texDiffuse, TexCoord) + specular;
 }
 
-vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir)
+vec4 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir)
 {
 	vec3 lightDir = normalize(light.pointLight.position - FragPos);
 	float theta = dot(lightDir, normalize(-light.direction));
@@ -84,10 +87,9 @@ void main()
 	vec3 normal = normalize(Normal);
 	vec3 viewDir = normalize(viewPos - FragPos);
 
-	vec3 pointLighting = calcPointLight(pointLight, normal, viewDir);
-	vec3 sunLighting = calcSunLight(sunLight, normal, viewDir);
-	vec3 spotLighting = calcSpotLight(spotLight, normal, viewDir);
+	vec4 pointLighting = calcPointLight(pointLight, normal, viewDir);
+	vec4 sunLighting = calcSunLight(sunLight, normal, viewDir);
+	vec4 spotLighting = calcSpotLight(spotLight, normal, viewDir);
 
-    FragColor = vec4(pointLighting + sunLighting + spotLighting, 1.0) * texture(tex, TexCoord);
-	//FragColor = vec4( spotLighting, 1.0) * texture(tex, TexCoord);
+    FragColor = pointLighting + sunLighting /*+ spotLighting*/;
 }
