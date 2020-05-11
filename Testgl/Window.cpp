@@ -18,6 +18,8 @@
 #include "PointLight.h"
 #include "SunLight.h"
 #include "SpotLight.h"
+#include "Texture.h"
+#include "TextureManager.h"
 
 Window::Window(int width, int height)
 {
@@ -83,6 +85,8 @@ void Window::run()
 	// - Normal Map
 	// - Height Map
 	// 
+
+	TextureManager textureManager("../Testgl/res/texture/");
 
 	float lightCubeVerticies[] = {
 		-0.5f, -0.5f, -0.5f,	
@@ -171,9 +175,7 @@ void Window::run()
 	};
 	TexturedModel cubeModel;
 	cubeModel.loadVertexNormalTexture(vertices, 36, GL_STATIC_DRAW);
-	//cubeModel.loadTexture("../Testgl/res/texture/3crates/crate1/crate1_diffuse.png");
-	cubeModel.loadTexture("../Testgl/res/texture/cobblestone/diffuse.png", TexturedModel::DIFFUSE);
-	cubeModel.loadTexture("../Testgl/res/texture/cobblestone/specular.png", TexturedModel::SPECULAR);
+	Texture* cubeTexture = textureManager.load("cobblestone");
 	glm::vec3 cubePositions[] = {
 		glm::vec3(2.0f,  0.0f,  0.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
@@ -212,7 +214,7 @@ void Window::run()
 
 	// Load Shaders
 	fontShader.load("../Testgl/res/shader/text.vert", "../Testgl/res/shader/text.frag");
-	simpleShader.load("../Testgl/res/shader/simple.vert", "../Testgl/res/shader/simple.frag");
+	entityShader.load("../Testgl/res/shader/entity.vert", "../Testgl/res/shader/entity.frag");
 	lightSourceShader.load("../Testgl/res/shader/lightsource.vert", "../Testgl/res/shader/lightsource.frag");
 
 	// Capture cursor
@@ -229,26 +231,27 @@ void Window::run()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		simpleShader.use();
+		entityShader.use();
 		// Lighting
-		sunLight.setShaderUniforms(simpleShader);
-		light1.setShaderUniforms(simpleShader);
+		sunLight.setShaderUniforms(entityShader);
+		light1.setShaderUniforms(entityShader);
 		spotLight.position = camera.position;
 		spotLight.rotation = camera.rotation;
-		spotLight.setShaderUniforms(simpleShader);
-		simpleShader.setVec3("viewPos", camera.position);
+		spotLight.setShaderUniforms(entityShader);
+		entityShader.setVec3("viewPos", camera.position);
 		// Camera
 		glm::mat4 projection(1.0f);
 		projection = glm::perspective(glm::radians(camera.fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
-		simpleShader.setMat4("projection", projection);
-		simpleShader.setMat4("view", camera.getView());
-		cubeMaterial.setShaderUniforms(simpleShader);
+		entityShader.setMat4("projection", projection);
+		entityShader.setMat4("view", camera.getView());
+		cubeMaterial.setShaderUniforms(entityShader);
 		// Draw scene
-		cubeModel.bind(simpleShader);
-		
+		cubeModel.bind();
+		cubeTexture->bind(entityShader);
+
 		for (unsigned int i = 0; i < 10; i++)
 		{
-			simpleShader.setMat4("model", cubes[i].modelMatrix);
+			entityShader.setMat4("model", cubes[i].modelMatrix);
 			cubeModel.draw();
 		}
 		// Light entities

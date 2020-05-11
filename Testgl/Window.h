@@ -44,7 +44,7 @@ private:
 	Camera camera;
 	FontManager fontManager;
 
-	Shader simpleShader;
+	Shader entityShader;
 	Shader fontShader;
 	Shader lightSourceShader;
 
