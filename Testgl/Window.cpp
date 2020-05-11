@@ -116,7 +116,7 @@ void Window::run()
 	light1.updateModelMatrix();
 
 	// SunLight shining down, slightly from x,-y
-	SunLight sunLight(glm::vec3(0.2f, 0.2f, 0.2f));
+	SunLight sunLight(glm::vec3(0.6f, 0.6f, 0.6f));
 	sunLight.rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-75.0f));
 	sunLight.rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(15.0f));
 
@@ -173,9 +173,59 @@ void Window::run()
 		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 1.0f
 	};
+	float groundVertices[] = {
+		// Z-
+		-0.5f, -0.5f, -0.5f,	0.0f, 0.0f, -1.0f,	0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,		0.0f, 0.0f, -1.0f,	8.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,		0.0f, 0.0f, -1.0f,	8.0f, 8.0f,
+		0.5f,  0.5f, -0.5f,		0.0f, 0.0f, -1.0f,	8.0f, 8.0f,
+		-0.5f,  0.5f, -0.5f,	0.0f, 0.0f, -1.0f,	0.0f, 8.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, 0.0f, -1.0f,	0.0f, 0.0f,
+
+		// Z+
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,	1.0f, 	0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,		0.0f, 0.0f,	1.0f, 	8.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,		0.0f, 0.0f,	1.0f, 	8.0f, 8.0f,
+		0.5f,  0.5f,  0.5f,		0.0f, 0.0f,	1.0f, 	8.0f, 8.0f,
+		-0.5f,  0.5f,  0.5f,	0.0f, 0.0f,	1.0f, 	0.0f, 8.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f, 0.0f,	1.0f, 	0.0f, 0.0f,
+
+		// X-
+		-0.5f,  0.5f,  0.5f,	-1.0f, 0.0f, 0.0f, 	8.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,	-1.0f, 0.0f, 0.0f, 	8.0f, 8.0f,
+		-0.5f, -0.5f, -0.5f,	-1.0f, 0.0f, 0.0f, 	0.0f, 8.0f,
+		-0.5f, -0.5f, -0.5f,	-1.0f, 0.0f, 0.0f, 	0.0f, 8.0f,
+		-0.5f, -0.5f,  0.5f,	-1.0f, 0.0f, 0.0f, 	0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,	-1.0f, 0.0f, 0.0f, 	8.0f, 0.0f,
+
+		// X+
+		0.5f,  0.5f,  0.5f,		1.0f, 0.0f, 0.0f, 	8.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,		1.0f, 0.0f, 0.0f, 	8.0f, 8.0f,
+		0.5f, -0.5f, -0.5f,		1.0f, 0.0f, 0.0f, 	0.0f, 8.0f,
+		0.5f, -0.5f, -0.5f,		1.0f, 0.0f, 0.0f, 	0.0f, 8.0f,
+		0.5f, -0.5f,  0.5f,		1.0f, 0.0f, 0.0f, 	0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,		1.0f, 0.0f, 0.0f, 	8.0f, 0.0f,
+
+		// Y-
+		-0.5f, -0.5f, -0.5f,	0.0f, -1.0f, 0.0f, 	0.0f, 8.0f,
+		0.5f, -0.5f, -0.5f,		0.0f, -1.0f, 0.0f, 	8.0f, 8.0f,
+		0.5f, -0.5f,  0.5f,		0.0f, -1.0f, 0.0f, 	8.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,		0.0f, -1.0f, 0.0f, 	8.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,	0.0f, -1.0f, 0.0f, 	0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,	0.0f, -1.0f, 0.0f, 	0.0f, 8.0f,
+
+		// Y+
+		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 8.0f,
+		0.5f,  0.5f, -0.5f,		0.0f, 1.0f,	0.0f, 	8.0f, 8.0f,
+		0.5f,  0.5f,  0.5f,		0.0f, 1.0f,	0.0f, 	8.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,		0.0f, 1.0f,	0.0f, 	8.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 8.0f
+	};
 	TexturedModel cubeModel;
 	cubeModel.loadVertexNormalTexture(vertices, 36, GL_STATIC_DRAW);
-	Texture* cubeTexture = textureManager.load("cobblestone");
+	Texture* cubeTexture = textureManager.load("3crates/crate1");
+	Texture* groundTexture = textureManager.load("cobblestone");
 	glm::vec3 cubePositions[] = {
 		glm::vec3(2.0f,  0.0f,  0.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
@@ -186,7 +236,7 @@ void Window::run()
 		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f),
-		glm::vec3(0.0f,  0.0f, -15.0f)
+		glm::vec3(0.0f,  0.0f, -14.0f)
 	};
 	Entity cubes[10];
 	for (unsigned int i = 0; i < 10; i++)
@@ -194,9 +244,12 @@ void Window::run()
 		cubes[i] = Entity(cubePositions[i]);
 		cubes[i].updateModelMatrix();
 	}
-	cubes[9].scale = glm::vec3(40.0f, 40.0f, 1.0f);
-	cubes[9].updateModelMatrix();
-
+	Entity ground;
+	ground.position += glm::vec3(0.0f, 0.0f, -15.0f);
+	ground.scale = glm::vec3(40.0f, 40.0f, 1.0f);
+	ground.updateModelMatrix();
+	TexturedModel groundModel;
+	groundModel.loadVertexNormalTexture(groundVertices, 36, GL_STATIC_DRAW);
 	// http://www.it.hiof.no/~borres/j3d/explain/light/p-materials.html
 
 	//Brass
@@ -254,6 +307,11 @@ void Window::run()
 			entityShader.setMat4("model", cubes[i].modelMatrix);
 			cubeModel.draw();
 		}
+		groundTexture->bind(entityShader);
+		groundModel.bind();
+		entityShader.setMat4("model", ground.modelMatrix);
+		groundModel.draw();
+
 		// Light entities
 		lightSourceShader.use();
 		lightSourceShader.setMat4("projection", projection);

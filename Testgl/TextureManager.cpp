@@ -34,7 +34,6 @@ Texture* const TextureManager::load(std::string name)
 	if (!anyTextureLoaded)
 	{
 		std::cerr << "ERROR::TEXTURE::LOADING_GROUP_FAILED" << std::endl;
-		return nullptr;
 	}
 	textures[name] = Texture(textureIDs);
 	return &textures[name];

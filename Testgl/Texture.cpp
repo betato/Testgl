@@ -22,12 +22,9 @@ void Texture::bind(Shader & shader)
 	// Loop through diffuse, specular, normal, height
 	for (unsigned int i = 0; i < 4; i++)
 	{
-		if (textureIDs[i] != 0)
-		{
-			shader.setInt(samplerNames[i], i); // Point sampler2D to texture unit
-			glActiveTexture(GL_TEXTURE0 + i); // Make new texture unit active to bind new texture
-			glBindTexture(GL_TEXTURE_2D, textureIDs[i]); // Bind texture to unit
-		}
+		shader.setInt(samplerNames[i], i); // Point sampler2D to texture unit (This probably doesn't need to be done every time)
+		glActiveTexture(GL_TEXTURE0 + i); // Make new texture unit active to bind new texture
+		glBindTexture(GL_TEXTURE_2D, textureIDs[i]); // Bind texture to unit (zero will unbind previous texture)
 	}
 }
 
