@@ -54,7 +54,6 @@ void Window::init()
 	scene.screenWidth = &screenWidth;
 	scene.screenHeight = &screenHeight;
 
-
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, windowResizeCallback);
 	glfwSetCursorPosCallback(window, mouseMoveCallback);
@@ -71,7 +70,7 @@ void Window::run()
 {
 	// TODO: Lighting
 	// 
-	// - Multiple lights
+	// Done - Multiple lights
 	// Done - Materials
 	// Done - Point light
 	// Done - Spot Light
@@ -84,15 +83,19 @@ void Window::run()
 	TextureManager textureManager("../Testgl/res/texture/");
 	
 	// Single point light
-	scene.pointLight = PointLight(glm::vec3(1.0f, 0.9f, 0.8f), 1.0f, 0.1f, 0.03f);
-	scene.pointLight.position = glm::vec3(-2.0f, 2.0f, -1.0f);
-	scene.pointLight.updateModelMatrix();
+	scene.pointLights.push_back(PointLight(glm::vec3(1.0f, 0.8f, 0.6f), 1.0f, 0.1f, 0.03f));
+	scene.pointLights.push_back(PointLight(glm::vec3(1.0f, 1.0f, 0.2f), 1.0f, 0.1f, 0.03f));
+	scene.pointLights.push_back(PointLight(glm::vec3(1.0f, 0.9f, 0.8f), 1.0f, 0.1f, 0.03f));
+
 	// SunLight shining down, slightly from x,-y
-	scene.sunLight = SunLight(glm::vec3(0.0f, 0.0f, 0.0f));
-	scene.sunLight.rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-75.0f));
-	scene.sunLight.rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(15.0f));
+	SunLight sun(glm::vec3(0.0f, 0.0f, 0.0f));
+	sun.rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-75.0f));
+	sun.rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(15.0f));
+	scene.sunLights.push_back(sun);
 	// SpotLight (a bit orangeish)
-	scene.spotLight = SpotLight(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.8f, 0.04f, glm::cos(glm::radians(10.0f)), glm::cos(glm::radians(16.0f)));
+	SpotLight flashLight(glm::vec3(1.8f, 1.8f, 1.8f), 1.0f, 0.8f, 0.04f, glm::cos(glm::radians(10.0f)), glm::cos(glm::radians(16.0f)));
+	flashLight.color = glm::vec3(0.0f);
+	scene.spotLights.push_back(flashLight);
 
 	// Load cube model
 	float vertices[] = {
@@ -256,13 +259,20 @@ void Window::run()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// Lighting
-		scene.spotLight.rotation = scene.camera.rotation;
-		scene.spotLight.position = scene.camera.position;
-		scene.spotLight.updateModelMatrix();
-		scene.pointLight.position.x = glm::sin(0.2f * (float)glfwGetTime()) * 3.0f;
-		scene.pointLight.position.y = glm::cos(0.2f * (float)glfwGetTime()) * 3.0f;
-		scene.pointLight.updateModelMatrix();
+		scene.spotLights[0].rotation = scene.camera.rotation;
+		scene.spotLights[0].position = scene.camera.position;
+		scene.spotLights[0].updateModelMatrix();
 
+		scene.pointLights[0].position.x = glm::sin(0.2f * (float)glfwGetTime()) * 3.0f;
+		scene.pointLights[0].position.y = glm::cos(0.2f * (float)glfwGetTime()) * 3.0f;
+		scene.pointLights[0].updateModelMatrix();
+		scene.pointLights[1].position.x = glm::cos(0.2f * (float)glfwGetTime()) * 3.0f;
+		scene.pointLights[1].position.y = glm::sin(0.2f * (float)glfwGetTime()) * 3.0f;
+		scene.pointLights[1].updateModelMatrix();
+		scene.pointLights[2].position.z = glm::sin(0.2f * (float)glfwGetTime()) * 3.0f;
+		scene.pointLights[2].position.y = glm::cos(0.2f * (float)glfwGetTime()) * 3.0f;
+		scene.pointLights[2].updateModelMatrix();
+		
 		// Draw scene
 		scene.draw();
 

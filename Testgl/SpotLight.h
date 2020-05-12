@@ -7,7 +7,7 @@ class SpotLight : public PointLight
 public:
 	SpotLight();
 	SpotLight(glm::vec3 color, float constant, float linear, float quadratic, float innerConeAngle, float outerConeAngle);
-	virtual void setShaderUniforms(Shader& shader) override;
+	virtual void setShaderUniforms(Shader& shader, int index) override;
 
 	float innerCone;
 	float outerCone;

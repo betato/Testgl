@@ -8,5 +8,5 @@ class SunLight : public Light
 public:
 	SunLight();
 	SunLight(glm::vec3 color);
-	virtual void setShaderUniforms(Shader& shader) override;
+	virtual void setShaderUniforms(Shader& shader, int index) override;
 };

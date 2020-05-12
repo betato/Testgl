@@ -10,6 +10,7 @@
 #include "Texture.h"
 #include "Camera.h"
 
+#include "Light.h"
 #include "PointLight.h"
 #include "SunLight.h"
 #include "SpotLight.h"
@@ -25,9 +26,9 @@ public:
 	void addEntity(ColoredEntity entity);
 	void draw();
 
-	PointLight pointLight;
-	SunLight sunLight;
-	SpotLight spotLight;
+	std::vector<PointLight> pointLights;
+	std::vector<SunLight> sunLights;
+	std::vector<SpotLight> spotLights;
 	Camera camera;
 
 	int* screenWidth;

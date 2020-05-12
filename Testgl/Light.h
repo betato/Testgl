@@ -8,7 +8,7 @@ class Light : public Entity
 public:
 	Light();
 	Light(glm::vec3 color);
-	virtual void setShaderUniforms(Shader& shader) = 0;
+	virtual void setShaderUniforms(Shader& shader, int index) = 0;
 
 	glm::vec3 color;
 };

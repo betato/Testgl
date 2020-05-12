@@ -1,5 +1,7 @@
 #include "Scene.h"
 
+#include <algorithm>
+
 Scene::Scene()
 {
 
@@ -29,14 +31,36 @@ void Scene::addEntity(ColoredEntity entity)
 	coloredEntities.push_back(entity);
 }
 
+#define MAX_SUN_LIGHTS 4
+#define MAX_POINT_LIGHTS 4
+#define MAX_SPOT_LIGHTS 4
+
 void Scene::draw()
 {
 	entityShader.use();
 
 	// Lighting
-	pointLight.setShaderUniforms(entityShader);
-	sunLight.setShaderUniforms(entityShader);
-	spotLight.setShaderUniforms(entityShader);
+	// TODO: Sort point lights and spot lights by distance and render the closet ones
+	unsigned int numSunLights = std::min((int)sunLights.size(), MAX_SUN_LIGHTS);
+	entityShader.setInt("numSunLights", numSunLights);
+	for (size_t i = 0; i < numSunLights; i++)
+	{
+		sunLights[i].setShaderUniforms(entityShader, i);
+	}
+
+	unsigned int numPointLights = std::min((int)pointLights.size(), MAX_POINT_LIGHTS);
+	entityShader.setInt("numPointLights", numPointLights);
+	for (size_t i = 0; i < numPointLights; i++)
+	{
+		pointLights[i].setShaderUniforms(entityShader, i);
+	}
+
+	unsigned int numSpotLights = std::min((int)spotLights.size(), MAX_SPOT_LIGHTS);
+	entityShader.setInt("numSpotLights", numSpotLights);
+	for (size_t i = 0; i < numSpotLights; i++)
+	{
+		spotLights[i].setShaderUniforms(entityShader, i);
+	}
 
 	// Camera
 	entityShader.setVec3("viewPos", camera.position);
@@ -65,8 +89,12 @@ void Scene::draw()
 	lightSourceShader.use();
 	lightSourceShader.setMat4("projection", projection);
 	lightSourceShader.setMat4("view", camera.getView());
-	lightSourceShader.setMat4("model", pointLight.modelMatrix);
-	lightSourceShader.setVec3("lightColor", pointLight.color);
 	lightCubeModel.bind();
-	lightCubeModel.drawIndices();
+	for (auto it = pointLights.begin(); it != pointLights.end(); it++)
+	{
+		// Draw each point light as a cube
+		lightSourceShader.setMat4("model", it->modelMatrix);
+		lightSourceShader.setVec3("lightColor", it->color);
+		lightCubeModel.drawIndices();
+	}
 }
