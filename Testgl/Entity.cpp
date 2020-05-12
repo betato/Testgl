@@ -12,7 +12,8 @@ Entity::Entity(glm::vec3 position, glm::vec3 rotation) :
 Entity::Entity(glm::vec3 position, glm::quat rotation) : 
 	Entity(position, rotation, glm::vec3(1.0f)) { }
 
-Entity::Entity(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : position(position), scale(scale)
+Entity::Entity(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : 
+	position(position), rotation(glm::quat(1.0f, 0.0f, 0.0f, 0.0f)), scale(scale)
 {
 	rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), rotation.x);
 	rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), rotation.y);

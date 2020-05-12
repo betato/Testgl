@@ -84,15 +84,15 @@ void Window::run()
 	TextureManager textureManager("../Testgl/res/texture/");
 	
 	// Single point light
-	scene.pointLight = PointLight(glm::vec3(0.8f, 0.8f, 0.8f), 1.0f, 0.1f, 0.03f);
+	scene.pointLight = PointLight(glm::vec3(1.0f, 0.9f, 0.8f), 1.0f, 0.1f, 0.03f);
 	scene.pointLight.position = glm::vec3(-2.0f, 2.0f, -1.0f);
 	scene.pointLight.updateModelMatrix();
 	// SunLight shining down, slightly from x,-y
-	scene.sunLight = SunLight(glm::vec3(0.1f, 0.1f, 0.1f));
+	scene.sunLight = SunLight(glm::vec3(0.0f, 0.0f, 0.0f));
 	scene.sunLight.rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-75.0f));
 	scene.sunLight.rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(15.0f));
 	// SpotLight (a bit orangeish)
-	scene.spotLight = SpotLight(glm::vec3(1.0f, 0.9f, 0.8f), 1.0f, 0.8f, 0.04f, glm::cos(glm::radians(10.0f)), glm::cos(glm::radians(16.0f)));
+	scene.spotLight = SpotLight(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.8f, 0.04f, glm::cos(glm::radians(10.0f)), glm::cos(glm::radians(16.0f)));
 
 	// Load cube model
 	float vertices[] = {
@@ -196,8 +196,8 @@ void Window::run()
 
 	Material cubeMaterial(
 		glm::vec3(0.1f, 0.1f, 0.1f), // Ambient
-		glm::vec3(0.7f, 0.7f, 0.7f), // Diffuse
-		glm::vec3(0.7f, 0.7f, 0.7f), // Specular
+		glm::vec3(0.9f, 0.9f, 0.9f), // Diffuse
+		glm::vec3(0.3f, 0.3f, 0.3f), // Specular
 		8.0f); // Shine
 
 	TexturedModel cubeModel;
@@ -217,7 +217,7 @@ void Window::run()
 	};
 	for (unsigned int i = 0; i < 10; i++)
 	{
-		Entity cubeEntity(cubePositions[i]);
+		Entity cubeEntity(cubePositions[i], cubePositions[i]);
 		cubeEntity.updateModelMatrix();
 		scene.addEntity(TexturedEntity(cubeTexture, &cubeModel, &cubeMaterial, cubeEntity));
 	}
