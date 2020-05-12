@@ -20,6 +20,7 @@
 #include "SpotLight.h"
 #include "Texture.h"
 #include "TextureManager.h"
+#include "Scene.h"
 
 Window::Window(int width, int height)
 {
@@ -50,7 +51,10 @@ void Window::init()
 	//glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, screenWidth, screenHeight);
-	
+	scene.screenWidth = &screenWidth;
+	scene.screenHeight = &screenHeight;
+
+
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, windowResizeCallback);
 	glfwSetCursorPosCallback(window, mouseMoveCallback);
@@ -65,15 +69,6 @@ void Window::init()
 
 void Window::run()
 {
-	// TODO: Move model management to separate class with entities organized based on model
-	// Each entity has:
-	//	- Entity
-	//	- Material
-	//	- Texture (optional)
-	//  - Colored verticies (optional)
-	// Lights should also exist here
-	// 
-
 	// TODO: Lighting
 	// 
 	// - Multiple lights
@@ -87,41 +82,17 @@ void Window::run()
 	// 
 
 	TextureManager textureManager("../Testgl/res/texture/");
-
-	float lightCubeVerticies[] = {
-		-0.5f, -0.5f, -0.5f,	
-		 0.5f, -0.5f, -0.5f,	
-		 0.5f,  0.5f, -0.5f,	
-		-0.5f,  0.5f, -0.5f,	
-		-0.5f, -0.5f,  0.5f,
-		 0.5f, -0.5f,  0.5f,
-		 0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f
-	};
-	unsigned int lightCubeIndicies[] = {
-		0, 1, 3, 3, 1, 2,
-		1, 5, 2, 2, 5, 6,
-		5, 4, 6, 6, 4, 7,
-		4, 0, 7, 7, 0, 3,
-		3, 2, 7, 7, 2, 6,
-		4, 5, 0, 0, 5, 1
-	};
-	// Set up lights
-	Model lightCubeModel;
-	lightCubeModel.loadVertex(lightCubeVerticies, 8, 3, GL_STATIC_DRAW);
-	lightCubeModel.loadIndices(lightCubeIndicies, 36, GL_STATIC_DRAW);
-	PointLight light1(glm::vec3(1.0f), 1.0f, 0.1f, 0.03f);
-	light1.position = glm::vec3(-2.0f, 2.0f, -1.0f);
-	light1.scale = glm::vec3(0.25f);
-	light1.updateModelMatrix();
-
+	
+	// Single point light
+	scene.pointLight = PointLight(glm::vec3(0.8f, 0.8f, 0.8f), 1.0f, 0.1f, 0.03f);
+	scene.pointLight.position = glm::vec3(-2.0f, 2.0f, -1.0f);
+	scene.pointLight.updateModelMatrix();
 	// SunLight shining down, slightly from x,-y
-	SunLight sunLight(glm::vec3(0.6f, 0.6f, 0.6f));
-	sunLight.rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-75.0f));
-	sunLight.rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(15.0f));
-
+	scene.sunLight = SunLight(glm::vec3(0.1f, 0.1f, 0.1f));
+	scene.sunLight.rotateAbsolute(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-75.0f));
+	scene.sunLight.rotateAbsolute(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(15.0f));
 	// SpotLight (a bit orangeish)
-	SpotLight spotLight(glm::vec3(1.0f, 0.9f, 0.8f), 1.0f, 0.8f, 0.04f, glm::cos(glm::radians(12.0f)), glm::cos(glm::radians(20.0f)));
+	scene.spotLight = SpotLight(glm::vec3(1.0f, 0.9f, 0.8f), 1.0f, 0.8f, 0.04f, glm::cos(glm::radians(10.0f)), glm::cos(glm::radians(16.0f)));
 
 	// Load cube model
 	float vertices[] = {
@@ -222,10 +193,16 @@ void Window::run()
 		-0.5f,  0.5f,  0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,	0.0f, 1.0f,	0.0f, 	0.0f, 8.0f
 	};
+
+	Material cubeMaterial(
+		glm::vec3(0.1f, 0.1f, 0.1f), // Ambient
+		glm::vec3(0.7f, 0.7f, 0.7f), // Diffuse
+		glm::vec3(0.7f, 0.7f, 0.7f), // Specular
+		8.0f); // Shine
+
 	TexturedModel cubeModel;
 	cubeModel.loadVertexNormalTexture(vertices, 36, GL_STATIC_DRAW);
 	Texture* cubeTexture = textureManager.load("3crates/crate1");
-	Texture* groundTexture = textureManager.load("cobblestone");
 	glm::vec3 cubePositions[] = {
 		glm::vec3(2.0f,  0.0f,  0.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
@@ -238,41 +215,35 @@ void Window::run()
 		glm::vec3(-1.3f,  1.0f, -1.5f),
 		glm::vec3(0.0f,  0.0f, -14.0f)
 	};
-	Entity cubes[10];
 	for (unsigned int i = 0; i < 10; i++)
 	{
-		cubes[i] = Entity(cubePositions[i]);
-		cubes[i].updateModelMatrix();
+		Entity cubeEntity(cubePositions[i]);
+		cubeEntity.updateModelMatrix();
+		scene.addEntity(TexturedEntity(cubeTexture, &cubeModel, &cubeMaterial, cubeEntity));
 	}
-	Entity ground;
-	ground.position += glm::vec3(0.0f, 0.0f, -15.0f);
-	ground.scale = glm::vec3(40.0f, 40.0f, 1.0f);
-	ground.updateModelMatrix();
+
+	Entity groundEntity;
+	groundEntity.position += glm::vec3(0.0f, 0.0f, -15.0f);
+	groundEntity.scale = glm::vec3(40.0f, 40.0f, 1.0f);
+	groundEntity.updateModelMatrix();
 	TexturedModel groundModel;
 	groundModel.loadVertexNormalTexture(groundVertices, 36, GL_STATIC_DRAW);
-	// http://www.it.hiof.no/~borres/j3d/explain/light/p-materials.html
+	Texture* groundTexture = textureManager.load("cobblestone");
+	scene.addEntity(TexturedEntity(groundTexture, &groundModel, &cubeMaterial, groundEntity));
 
-	//Brass
+	// Brass: http://www.it.hiof.no/~borres/j3d/explain/light/p-materials.html
 	//Material cubeMaterial(
 	//	glm::vec3(0.329412f, 0.223529f, 0.027451f), // Ambient
 	//	glm::vec3(0.780392f, 0.568627f, 0.113725f), // Diffuse
 	//	glm::vec3(0.992157f, 0.941176f, 0.807843f), // Specular
 	//	27.8974f); // Shine
 
-	Material cubeMaterial(
-		glm::vec3(0.1f, 0.1f, 0.1f), // Ambient
-		glm::vec3(0.7f, 0.7f, 0.7f), // Diffuse
-		glm::vec3(0.7f, 0.7f, 0.7f), // Specular
-		8.0f); // Shine
-
 	// Load Shaders
 	fontShader.load("../Testgl/res/shader/text.vert", "../Testgl/res/shader/text.frag");
-	entityShader.load("../Testgl/res/shader/entity.vert", "../Testgl/res/shader/entity.frag");
-	lightSourceShader.load("../Testgl/res/shader/lightsource.vert", "../Testgl/res/shader/lightsource.frag");
+	scene.load();
 
 	// Capture cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glm::quat rotation = glm::angleAxis(0.5f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// Main loop
 	while (!glfwWindowShouldClose(window))
@@ -284,54 +255,28 @@ void Window::run()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		entityShader.use();
 		// Lighting
-		sunLight.setShaderUniforms(entityShader);
-		light1.setShaderUniforms(entityShader);
-		spotLight.position = camera.position;
-		spotLight.rotation = camera.rotation;
-		spotLight.setShaderUniforms(entityShader);
-		entityShader.setVec3("viewPos", camera.position);
-		// Camera
-		glm::mat4 projection(1.0f);
-		projection = glm::perspective(glm::radians(camera.fov), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
-		entityShader.setMat4("projection", projection);
-		entityShader.setMat4("view", camera.getView());
-		cubeMaterial.setShaderUniforms(entityShader);
+		scene.spotLight.rotation = scene.camera.rotation;
+		scene.spotLight.position = scene.camera.position;
+		scene.spotLight.updateModelMatrix();
+		scene.pointLight.position.x = glm::sin(0.2f * (float)glfwGetTime()) * 3.0f;
+		scene.pointLight.position.y = glm::cos(0.2f * (float)glfwGetTime()) * 3.0f;
+		scene.pointLight.updateModelMatrix();
+
 		// Draw scene
-		cubeModel.bind();
-		cubeTexture->bind(entityShader);
-
-		for (unsigned int i = 0; i < 10; i++)
-		{
-			entityShader.setMat4("model", cubes[i].modelMatrix);
-			cubeModel.draw();
-		}
-		groundTexture->bind(entityShader);
-		groundModel.bind();
-		entityShader.setMat4("model", ground.modelMatrix);
-		groundModel.draw();
-
-		// Light entities
-		lightSourceShader.use();
-		lightSourceShader.setMat4("projection", projection);
-		lightSourceShader.setMat4("view", camera.getView());
-		lightSourceShader.setMat4("model", light1.modelMatrix);
-		lightSourceShader.setVec3("lightColor", light1.color);
-		lightCubeModel.bind();
-		lightCubeModel.drawIndices();
+		scene.draw();
 
 		// Draw text
 		fontShader.use();
 		fontShader.setMat4("projection", glm::ortho(0.0f, (float)screenWidth, 0.0f, (float)screenHeight));
 		glUniform3f(glGetUniformLocation(fontShader.ID, "textColor"), 1.0f, 1.0f, 1.0f);
 		fontManager.drawText(std::to_string(frameCounter.fps), 25.0f, 25.0f, 0.5f);
-		fontManager.drawText("pos: " + glm::to_string(camera.position), 25.0f, 200.0f, 0.5f);
-		fontManager.drawText("rot: " + glm::to_string(camera.rotation), 25.0f, 175.0f, 0.5f);
-		fontManager.drawText("up: " + glm::to_string(camera.up), 25.0f, 150.0f, 0.5f);
-		fontManager.drawText("right: " + glm::to_string(camera.right), 25.0f, 125.0f, 0.5f);
-		fontManager.drawText("front: " + glm::to_string(camera.forward), 25.0f, 100.0f, 0.5f);
-		fontManager.drawText("fov: " + std::to_string(camera.fov), 25.0f, 75.0f, 0.5f);
+		fontManager.drawText("pos: " + glm::to_string(scene.camera.position), 25.0f, 200.0f, 0.5f);
+		fontManager.drawText("rot: " + glm::to_string(scene.camera.rotation), 25.0f, 175.0f, 0.5f);
+		fontManager.drawText("up: " + glm::to_string(scene.camera.up), 25.0f, 150.0f, 0.5f);
+		fontManager.drawText("right: " + glm::to_string(scene.camera.right), 25.0f, 125.0f, 0.5f);
+		fontManager.drawText("front: " + glm::to_string(scene.camera.forward), 25.0f, 100.0f, 0.5f);
+		fontManager.drawText("fov: " + std::to_string(scene.camera.fov), 25.0f, 75.0f, 0.5f);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -373,9 +318,9 @@ void Window::mouseMoved(double xpos, double ypos)
 
 	if (cursorCaptured) {
 		// Yaw then rotate -> yaw should be independent of existing rotation (this prevents the camera from rolling)
-		camera.rotateAbsolute(glm::vec3(0.0f, 0.0f, 1.0f), glm::radians(xoffset * MOUSE_SENSITIVITY));
+		scene.camera.rotateAbsolute(glm::vec3(0.0f, 0.0f, 1.0f), glm::radians(xoffset * MOUSE_SENSITIVITY));
 		// Rotate then pitch -> pitch should add to existing pitch
-		camera.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(yoffset * MOUSE_SENSITIVITY));
+		scene.camera.rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(yoffset * MOUSE_SENSITIVITY));
 		
 		// Make sure screen doesn't get flipped by clamping pitch
 		/*if (camera.rotation.y > 89.0f)
@@ -383,20 +328,20 @@ void Window::mouseMoved(double xpos, double ypos)
 		if (camera.rotation.y < -89.0f)
 			camera.rotation.y = -89.0f;*/
 
-		camera.updateDirection();
+		scene.camera.updateDirection();
 	}
 }
 
 void Window::mouseScrolled(double xoffset, double yoffset)
 {
-	if (camera.fov >= 1.0f && camera.fov <= 120.0f)
-		camera.fov -= (float)yoffset;
-	if (camera.fov <= 1.0f)
-		camera.fov = 1.0f;
-	if (camera.fov >= 120.0f)
-		camera.fov = 120.0f;
+	if (scene.camera.fov >= 1.0f && scene.camera.fov <= 120.0f)
+		scene.camera.fov -= (float)yoffset;
+	if (scene.camera.fov <= 1.0f)
+		scene.camera.fov = 1.0f;
+	if (scene.camera.fov >= 120.0f)
+		scene.camera.fov = 120.0f;
 	//camera.rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(yoffset * 5.0f)); // Roll
-	camera.updateDirection();
+	scene.camera.updateDirection();
 }
 
 void Window::processInput(GLFWwindow* window)
@@ -409,21 +354,21 @@ void Window::processInput(GLFWwindow* window)
 	float cameraMovement = CAMERA_SPEED * (timeNow - lastTime);
 	lastTime = timeNow;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.position += cameraMovement * camera.forward;
+		scene.camera.position += cameraMovement * scene.camera.forward;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.position -= cameraMovement * camera.forward;
+		scene.camera.position -= cameraMovement * scene.camera.forward;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.position -= glm::normalize(glm::cross(camera.forward, camera.up)) * cameraMovement;
+		scene.camera.position -= glm::normalize(glm::cross(scene.camera.forward, scene.camera.up)) * cameraMovement;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.position += glm::normalize(glm::cross(camera.forward, camera.up)) * cameraMovement;
+		scene.camera.position += glm::normalize(glm::cross(scene.camera.forward, scene.camera.up)) * cameraMovement;
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		camera.position += cameraMovement * camera.up;
+		scene.camera.position += cameraMovement * scene.camera.up;
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		camera.position -= cameraMovement * camera.up;
+		scene.camera.position -= cameraMovement * scene.camera.up;
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
 	{
-		camera.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-		camera.updateDirection();
+		scene.camera.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		scene.camera.updateDirection();
 	}
 		
 	// Cursor capture

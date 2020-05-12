@@ -93,5 +93,5 @@ void main()
 	vec4 sunLighting = calcSunLight(sunLight, normal, viewDir);
 	vec4 spotLighting = calcSpotLight(spotLight, normal, viewDir);
 
-    FragColor = pointLighting + sunLighting /*+ spotLighting*/;
+    FragColor = pointLighting + sunLighting + spotLighting;
 }

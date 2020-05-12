@@ -8,8 +8,7 @@ TextureManager::TextureManager(std::string basePath) : basePath(basePath) { }
 
 TextureManager::~TextureManager()
 {
-	std::unordered_map<std::string, Texture>::iterator it;
-	for (it = textures.begin(); it != textures.end(); it++)
+	for (auto it = textures.begin(); it != textures.end(); it++)
 	{
 		it->second.deleteTextures();
 	}

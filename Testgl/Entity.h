@@ -2,6 +2,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include "Texture.h"
+#include "TexturedModel.h"
+#include "Material.h"
+#include "ColoredModel.h"
+
 class Entity
 {
 public:
@@ -21,5 +26,26 @@ public:
 	glm::vec3 scale;
 
 	glm::mat4 modelMatrix;
+};
+
+struct TexturedEntity
+{
+	//TexturedEntity() { }
+	TexturedEntity(Texture* texture, TexturedModel* model, Material* material, Entity entity) :
+		texture(texture), model(model), material(material), entity(entity) { }
+	Texture* texture;
+	TexturedModel* model;
+	Material* material;
+	Entity entity;
+};
+
+struct ColoredEntity
+{
+	//ColoredEntity() { }
+	ColoredEntity(ColoredModel model, Material* material, Entity entity) :
+		entity(entity), material(material), model(model) { }
+	ColoredModel model;
+	Material* material;
+	Entity entity;
 };
 
